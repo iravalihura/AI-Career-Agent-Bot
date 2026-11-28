@@ -1,0 +1,25 @@
+flowchart LR
+    subgraph External["Зовнішні сервіси"]
+        JB["Платформи вакансій\n(Job Boards)"]
+        LLM["LLM API"]
+        TG["Telegram Platform"]
+    end
+
+    subgraph Ingestion["Vacancy Ingestion & AI Generation\n(Обмежений контекст)"]
+        IngestMod["Збір, нормалізація,\nоцінка сумісності та генерація"]
+    end
+
+    subgraph Matching["Candidate & Matching\n(Обмежений контекст)"]
+        AppAgg["Агрегат JobApplication\nта поріг сумісності"]
+    end
+
+    subgraph Notify["Telegram Notification\n(Обмежений контекст)"]
+        BotAdap["Адаптер повідомлень\nта діалогів бота"]
+    end
+
+    JB -->|"HTTP / Scraping\n[Зовнішнє джерело]"| IngestMod
+    IngestMod -->|"HTTPS / REST API\n[Оцінка та генерація]"| LLM
+
+    IngestMod -->|"Customer-Supplier / Published Language\n[Нормалізована вакансія + Score]"| AppAgg
+    AppAgg -->|"Open Host Service / ACL\n[Доменна подія / стан заявки]"| BotAdap
+    BotAdap -->|"HTTPS / Bot API\n[Сповіщення, документи, команди]"| TG
